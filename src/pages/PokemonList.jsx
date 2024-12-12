@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getPokemonList } from '../store/pokemonSlice';
 import PokemonCard from '../components/PokemonCard';
 import Filter from '../components/Filter';
+import Loader from '../components/Loader';
 
 const PokemonList = () => {
   const dispatch = useDispatch();
@@ -38,13 +39,14 @@ const PokemonList = () => {
   };
 
   return (
-    <div
-      className="w-full min-h-screen"
-    >
+    <div className="w-full min-h-screen relative">
+      {status === 'loading' && <Loader />}
+
       <div className="container mx-auto p-4">
         <Filter onFilter={handleFilter} />
-        {status === 'loading' && <p>Loading...</p>}
+
         {status === 'failed' && <p className="text-red-500">{error}</p>}
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 h-[90vh] overflow-auto w-full">
           {filteredList.map((pokemon) => (
             <PokemonCard key={pokemon.name} pokemon={pokemon} />

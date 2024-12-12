@@ -1,7 +1,8 @@
-import  { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { getPokemonDetail } from '../store/pokemonSlice';
+import Loader from '../components/Loader';
 
 const PokemonDetail = () => {
   const { name } = useParams();
@@ -12,7 +13,7 @@ const PokemonDetail = () => {
     dispatch(getPokemonDetail(name));
   }, [dispatch, name]);
 
-  if (status === 'loading') return <p className="text-center mt-4">Loading...</p>;
+  if (status === 'loading') return <Loader />;
   if (status === 'failed') return <p className="text-center text-red-500 mt-4">{error}</p>;
   if (!selectedPokemon) return null;
 
@@ -37,12 +38,10 @@ const PokemonDetail = () => {
             <li>Height: {selectedPokemon.height}</li>
             <li>Weight: {selectedPokemon.weight}</li>
             <li>
-              Types:{' '}
-              {selectedPokemon.types.map((typeInfo) => typeInfo.type.name).join(', ')}
+              Types: {selectedPokemon.types.map((typeInfo) => typeInfo.type.name).join(', ')}
             </li>
             <li>
-              Abilities:{' '}
-              {selectedPokemon.abilities.map((abilityInfo) => abilityInfo.ability.name).join(', ')}
+              Abilities: {selectedPokemon.abilities.map((abilityInfo) => abilityInfo.ability.name).join(', ')}
             </li>
           </ul>
         </div>
