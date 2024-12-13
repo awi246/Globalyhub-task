@@ -56,7 +56,7 @@ const PokemonList = () => {
         {status === 'succeeded' && filteredList.length === 0 && searchedName ? (
           <NotFound searchedName={searchedName} />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 h-[90vh] overflow-auto w-full">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 h-[90vh] overflow-auto w-full">
             {filteredList.map((pokemon) => (
               <PokemonCard key={pokemon.name} pokemon={pokemon} />
             ))}
