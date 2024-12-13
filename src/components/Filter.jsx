@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import pikaSearch from '../assets/pikaSearch.png';
 
 const Filter = ({ onFilter, genders = [], regions = [], habitats = [] }) => {
+  
   const [name, setName] = useState('');
   const [gender, setGender] = useState('');
   const [region, setRegion] = useState('');
