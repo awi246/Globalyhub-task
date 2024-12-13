@@ -166,7 +166,7 @@ const Filter = ({ onFilter, genders = [], regions = [], habitats = [] }) => {
   };
 
   return (
-    <div className="flex flex-wrap items-center space-x-4 mb-4">
+    <div className="flex flex-wrap items-center gap-4 mb-4">
       {selectedFilter ? (
         <div className="flex items-center border border-gray-300 p-2 rounded bg-gray-200 max-w-xs truncate">
           <span className="mr-2">
@@ -178,11 +178,11 @@ const Filter = ({ onFilter, genders = [], regions = [], habitats = [] }) => {
           />
         </div>
       ) : (
-        <Dropdown 
-          menu={menu} 
-          trigger={['click']} 
+        <Dropdown
+          menu={menu}
+          trigger={['click']}
           placement="bottomLeft"
-          getPopupContainer={trigger => trigger.parentNode} 
+          getPopupContainer={(trigger) => trigger.parentNode}
         >
           <Button className="border border-gray-300 p-2 rounded flex items-center">
             <FaFilter className="mr-2 text-purple-500" /> Filter <DownOutlined className="ml-1" />
@@ -190,21 +190,17 @@ const Filter = ({ onFilter, genders = [], regions = [], habitats = [] }) => {
         </Dropdown>
       )}
 
-      <input
-        type="text"
-        placeholder="Search by name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        className="border border-gray-300 p-2 rounded flex-grow min-w-0"
-      />
-
-      <div className="bg-yellow-500 text-white px-4 py-2 rounded flex items-center">
-        <img
-          src={pikaSearch}
-          alt="Search Icon"
-          className="ml-2 h-10 w-20 object-contain"
+      <div className="flex-1 min-w-[150px]">
+        <input
+          type="text"
+          placeholder="Search by name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="border border-gray-300 p-2 rounded w-full"
         />
       </div>
+
+
     </div>
   );
 };
