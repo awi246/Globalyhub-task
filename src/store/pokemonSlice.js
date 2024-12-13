@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { fetchPokemonList, fetchPokemonDetail } from '../api/apiServices';
+import { fetchPokemonList, fetchPokemonDetail, fetchGenders, fetchRegions, fetchHabitats } from '../api/apiServices';
 
 const initialState = {
   list: [],
@@ -9,6 +9,9 @@ const initialState = {
   status: 'idle',
   error: null,
   selectedPokemon: null,
+  genders: [],
+  regions: [],
+  habitats: [],
 };
 
 export const getPokemonList = createAsyncThunk(
@@ -26,6 +29,21 @@ export const getPokemonDetail = createAsyncThunk(
     return response.data;
   }
 );
+
+export const getGenders = createAsyncThunk('pokemon/getGenders', async () => {
+  const response = await fetchGenders();
+  return response.data.results;
+});
+
+export const getRegions = createAsyncThunk('pokemon/getRegions', async () => {
+  const response = await fetchRegions();
+  return response.data.results;
+});
+
+export const getHabitats = createAsyncThunk('pokemon/getHabitats', async () => {
+  const response = await fetchHabitats();
+  return response.data.results;
+});
 
 const pokemonSlice = createSlice({
   name: 'pokemon',
@@ -57,6 +75,15 @@ const pokemonSlice = createSlice({
       .addCase(getPokemonDetail.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.error.message;
+      })
+      .addCase(getGenders.fulfilled, (state, action) => {
+        state.genders = action.payload;
+      })
+      .addCase(getRegions.fulfilled, (state, action) => {
+        state.regions = action.payload;
+      })
+      .addCase(getHabitats.fulfilled, (state, action) => {
+        state.habitats = action.payload;
       });
   },
 });

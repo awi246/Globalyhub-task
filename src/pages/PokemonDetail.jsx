@@ -5,7 +5,6 @@ import { getPokemonDetail } from '../store/pokemonSlice';
 import Loader from '../components/Loader';
 import pikaBack from '../assets/pikaSearch.png';
 
-
 const PokemonDetail = () => {
   const { name } = useParams();
   const navigate = useNavigate();
@@ -72,20 +71,25 @@ const PokemonDetail = () => {
       <div className="mt-6">
         <h2 className="text-2xl font-semibold mb-4">Sprites</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-          {spriteCategories.map((key) => (
-            <div
-              key={key}
-              className="flex flex-col items-center bg-white p-4 rounded-lg shadow hover:shadow-xl transition-shadow transform hover:scale-105"
-            >
-              <img
-                src={sprites[key]}
-                alt={`${name} ${key}`}
-                className="w-24 h-24 object-contain"
-                loading="lazy"
-              />
-              <p className="mt-2 text-sm capitalize">{key.replace(/_/g, ' ')}</p>
-            </div>
-          ))}
+          {spriteCategories.map((key, index) => {
+            const spriteUrl = sprites?.[key];
+            if (!spriteUrl) return null;
+
+            return (
+              <div
+                key={`${key}-${index}`}
+                className="flex flex-col items-center bg-white p-4 rounded-lg shadow hover:shadow-xl transition-shadow transform hover:scale-105"
+              >
+                <img
+                  src={spriteUrl}
+                  alt={`${name} ${key}`}
+                  className="w-24 h-24 object-contain"
+                  loading="lazy"
+                />
+                <p className="mt-2 text-sm capitalize">{key.replace(/_/g, ' ')}</p>
+              </div>
+            );
+          })}
         </div>
       </div>
     );
@@ -97,18 +101,17 @@ const PokemonDetail = () => {
     return (
       <div className="mt-6">
         <h2 className="text-2xl font-semibold mb-4">Version-Specific Sprites</h2>
-        {Object.keys(versions).map((generation) => (
-          <div key={generation} className="mb-4">
+        {Object.keys(versions).map((generation, genIndex) => (
+          <div key={`${generation}-${genIndex}`} className="mb-4">
             <button
               onClick={() => setActiveGeneration(activeGeneration === generation ? null : generation)}
               className="w-full text-left flex justify-between items-center bg-gray-200 p-3 rounded-lg shadow hover:bg-gray-300 transition-colors"
             >
               <h3 className="text-xl font-semibold capitalize">
-                {generation.replace('-', ' ')}
+                {generation.replace(/-/g, ' ')}
               </h3>
               <svg
-                className={`w-6 h-6 transform transition-transform ${activeGeneration === generation ? 'rotate-180' : ''
-                  }`}
+                className={`w-6 h-6 transform transition-transform ${activeGeneration === generation ? 'rotate-180' : ''}`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -119,31 +122,38 @@ const PokemonDetail = () => {
             </button>
             {activeGeneration === generation && (
               <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                {Object.keys(versions[generation]).map((versionKey) => {
-                  const versionData = versions[generation][versionKey];
+                {versions[generation] && Object.keys(versions[generation]).map((versionKey, verIndex) => {
+                  const versionData = versions[generation]?.[versionKey];
+                  if (!versionData) return null;
+
                   if (typeof versionData === 'object' && !Array.isArray(versionData)) {
-                    return Object.keys(versionData).map((spriteKey) => (
-                      <div
-                        key={`${versionKey}-${spriteKey}`}
-                        className="flex flex-col items-center bg-white p-4 rounded-lg shadow hover:shadow-xl transition-shadow transform hover:scale-105"
-                      >
-                        <img
-                          src={versionData[spriteKey]}
-                          alt={`${name} ${generation} ${versionKey} ${spriteKey}`}
-                          className="w-24 h-24 object-contain"
-                          loading="lazy"
-                        />
-                        <p className="mt-2 text-sm capitalize">
-                          {versionKey.replace(/_/g, ' ')} {spriteKey.replace(/_/g, ' ')}
-                        </p>
-                      </div>
-                    ));
+                    return Object.keys(versionData).map((spriteKey, spriteIndex) => {
+                      const spriteUrl = versionData?.[spriteKey];
+                      if (!spriteUrl) return null;
+
+                      return (
+                        <div
+                          key={`${versionKey}-${spriteKey}-${spriteIndex}`}
+                          className="flex flex-col items-center bg-white p-4 rounded-lg shadow hover:shadow-xl transition-shadow transform hover:scale-105"
+                        >
+                          <img
+                            src={spriteUrl}
+                            alt={`${name} ${generation} ${versionKey} ${spriteKey}`}
+                            className="w-24 h-24 object-contain"
+                            loading="lazy"
+                          />
+                          <p className="mt-2 text-sm capitalize">
+                            {versionKey.replace(/_/g, ' ')} {spriteKey.replace(/_/g, ' ')}
+                          </p>
+                        </div>
+                      );
+                    });
                   }
 
                   if (typeof versionData === 'string') {
                     return (
                       <div
-                        key={versionKey}
+                        key={`${versionKey}-${verIndex}`}
                         className="flex flex-col items-center bg-white p-4 rounded-lg shadow hover:shadow-xl transition-shadow transform hover:scale-105"
                       >
                         <img
@@ -176,11 +186,12 @@ const PokemonDetail = () => {
           onClick={() => navigate(-1)}
           className="mb-6 bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded shadow flex items-center transition-colors"
         >
-          <span className="text-xl">←</span>   <img
-          src={pikaBack}
-          alt="Search Icon"
-          className=" h-10 w-20"
-        />
+          <span className="text-xl">←</span>
+          <img
+            src={pikaBack}
+            alt="Search Icon"
+            className="h-10 w-20"
+          />
         </button>
 
         <div className="flex flex-col items-center">
@@ -188,7 +199,7 @@ const PokemonDetail = () => {
             <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 animate-pulse opacity-75"></div>
             <div className="relative bg-white p-4 rounded-full shadow-2xl">
               <img
-                src={sprites.front_default || '/placeholder.png'}
+                src={sprites?.front_default || '/placeholder.png'}
                 alt={name}
                 className="w-40 h-40 object-contain rounded-full border-4 border-white"
               />
@@ -199,16 +210,21 @@ const PokemonDetail = () => {
           <p className="text-gray-600 text-lg">ID: {id}</p>
 
           <div className="mt-4 flex space-x-2">
-            {types.map((typeInfo) => (
-              <span
-                key={typeInfo.type.name}
-                className={`px-4 py-2 rounded-full text-white text-sm font-semibold shadow ${
-                  typeColors[typeInfo.type.name] || typeColors.default
-                }`}
-              >
-                {typeInfo.type.name}
-              </span>
-            ))}
+            {types.map((typeInfo, index) => {
+              const typeName = typeInfo?.type?.name;
+              if (!typeName) return null;
+
+              return (
+                <span
+                  key={`${typeName}-${index}`}
+                  className={`px-4 py-2 rounded-full text-white text-sm font-semibold shadow ${
+                    typeColors[typeName] || typeColors.default
+                  }`}
+                >
+                  {typeName}
+                </span>
+              );
+            })}
           </div>
 
           {renderSprites()}
@@ -239,11 +255,16 @@ const PokemonDetail = () => {
               <h2 className="text-2xl font-semibold mb-4">Abilities</h2>
               <ul className="list-disc list-inside text-gray-700 space-y-2">
                 {abilities.length > 0 ? (
-                  abilities.map((abilityInfo) => (
-                    <li key={abilityInfo.ability.name} className="capitalize">
-                      {abilityInfo.ability.name} {abilityInfo.is_hidden && '(Hidden)'}
-                    </li>
-                  ))
+                  abilities.map((abilityInfo, index) => {
+                    const abilityName = abilityInfo?.ability?.name;
+                    if (!abilityName) return null;
+
+                    return (
+                      <li key={`${abilityName}-${index}`} className="capitalize">
+                        {abilityName} {abilityInfo.is_hidden && '(Hidden)'}
+                      </li>
+                    );
+                  })
                 ) : (
                   <li>None</li>
                 )}
@@ -252,11 +273,16 @@ const PokemonDetail = () => {
                 <div className="mt-4">
                   <h3 className="text-xl font-semibold mb-2">Past Abilities</h3>
                   <ul className="list-disc list-inside text-gray-700 space-y-2">
-                    {past_abilities.map((pastAbility) => (
-                      <li key={pastAbility.ability.name} className="capitalize">
-                        {pastAbility.ability.name} {pastAbility.is_hidden && '(Hidden)'}
-                      </li>
-                    ))}
+                    {past_abilities.map((pastAbility, index) => {
+                      const pastAbilityName = pastAbility?.ability?.name;
+                      if (!pastAbilityName) return null;
+
+                      return (
+                        <li key={`${pastAbilityName}-${index}`} className="capitalize">
+                          {pastAbilityName} {pastAbility.is_hidden && '(Hidden)'}
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
               )}
@@ -265,21 +291,35 @@ const PokemonDetail = () => {
             <div className="bg-purple-50 p-6 rounded-lg shadow hover:shadow-xl transition-shadow">
               <h2 className="text-2xl font-semibold mb-4">Types</h2>
               <ul className="list-disc list-inside text-gray-700 space-y-2">
-                {types.map((typeInfo) => (
-                  <li key={typeInfo.type.name} className="capitalize">
-                    {typeInfo.type.name} (Slot: {typeInfo.slot})
-                  </li>
-                ))}
+                {types.length > 0 ? (
+                  types.map((typeInfo, index) => {
+                    const typeName = typeInfo?.type?.name;
+                    if (!typeName) return null;
+
+                    return (
+                      <li key={`${typeName}-${index}`} className="capitalize">
+                        {typeName} (Slot: {typeInfo.slot})
+                      </li>
+                    );
+                  })
+                ) : (
+                  <li>None</li>
+                )}
               </ul>
               {past_types.length > 0 && (
                 <div className="mt-4">
                   <h3 className="text-xl font-semibold mb-2">Past Types</h3>
                   <ul className="list-disc list-inside text-gray-700 space-y-2">
-                    {past_types.map((pastType) => (
-                      <li key={pastType.type.name} className="capitalize">
-                        {pastType.type.name} (Slot: {pastType.slot})
-                      </li>
-                    ))}
+                    {past_types.map((pastType, index) => {
+                      const pastTypeName = pastType?.type?.name;
+                      if (!pastTypeName) return null;
+
+                      return (
+                        <li key={`${pastTypeName}-${index}`} className="capitalize">
+                          {pastTypeName} (Slot: {pastType.slot})
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
               )}
@@ -291,11 +331,16 @@ const PokemonDetail = () => {
               <h2 className="text-2xl font-semibold mb-4">Stats</h2>
               {stats.length > 0 ? (
                 <ul className="list-disc list-inside text-gray-700 space-y-2">
-                  {stats.map((statInfo) => (
-                    <li key={statInfo.stat.name} className="capitalize">
-                      {statInfo.stat.name}: {statInfo.base_stat}
-                    </li>
-                  ))}
+                  {stats.map((statInfo, index) => {
+                    const statName = statInfo?.stat?.name;
+                    if (!statName) return null;
+
+                    return (
+                      <li key={`${statName}-${index}`} className="capitalize">
+                        {statName}: {statInfo.base_stat}
+                      </li>
+                    );
+                  })}
                 </ul>
               ) : (
                 <p className="text-gray-700">No stats available.</p>
@@ -307,13 +352,18 @@ const PokemonDetail = () => {
             <div className="bg-pink-50 p-6 rounded-lg shadow hover:shadow-md transition-shadow">
               <h2 className="text-2xl font-semibold mb-4">Moves</h2>
               {moves.length > 0 ? (
-                <div className=" max-h-screen overflow-y-auto">
+                <div className="max-h-screen overflow-y-auto">
                   <ul className="list-disc list-inside text-gray-700 space-y-2">
-                    {moves.map((moveInfo) => (
-                      <li key={moveInfo.move.name} className="capitalize">
-                        {moveInfo.move.name.replace('-', ' ')}
-                      </li>
-                    ))}
+                    {moves.map((moveInfo, index) => {
+                      const moveName = moveInfo?.move?.name;
+                      if (!moveName) return null;
+
+                      return (
+                        <li key={`${moveName}-${index}`} className="capitalize">
+                          {moveName.replace(/-/g, ' ')}
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
               ) : (
@@ -325,11 +375,16 @@ const PokemonDetail = () => {
               <h2 className="text-2xl font-semibold mb-4">Game Indices</h2>
               {game_indices.length > 0 ? (
                 <ul className="list-disc list-inside text-gray-700 space-y-2">
-                  {game_indices.map((game) => (
-                    <li key={game.version.name} className="capitalize">
-                      {game.version.name} (Index: {game.game_index})
-                    </li>
-                  ))}
+                  {game_indices.map((game, index) => {
+                    const versionName = game?.version?.name;
+                    if (!versionName) return null;
+
+                    return (
+                      <li key={`${versionName}-${index}`} className="capitalize">
+                        {versionName} (Index: {game.game_index})
+                      </li>
+                    );
+                  })}
                 </ul>
               ) : (
                 <p className="text-gray-700">No game indices available.</p>

@@ -1,17 +1,85 @@
-import { useState } from 'react';
+/* eslint-disable */
+import { useState, useEffect } from 'react';
 import pikaSearch from '../assets/pikaSearch.png';
 
-// eslint-disable-next-line react/prop-types
-const Filter = ({ onFilter }) => {
+const Filter = ({ onFilter, genders = [], regions = [], habitats = [] }) => {
   const [name, setName] = useState('');
+  const [gender, setGender] = useState('');
+  const [region, setRegion] = useState('');
+  const [habitat, setHabitat] = useState('');
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    onFilter({ name });
+  const handleGenderChange = (e) => {
+    const val = e.target.value;
+    if (val) {
+      setRegion('');
+      setHabitat('');
+    }
+    setGender(val);
   };
 
+  const handleRegionChange = (e) => {
+    const val = e.target.value;
+    if (val) {
+      setGender('');
+      setHabitat('');
+    }
+    setRegion(val);
+  };
+
+  const handleHabitatChange = (e) => {
+    const val = e.target.value;
+    if (val) {
+      setGender('');
+      setRegion('');
+    }
+    setHabitat(val);
+  };
+
+  useEffect(() => {
+    onFilter({ name, gender, region, habitat });
+  }, [name, gender, region, habitat]);
+
   return (
-    <form onSubmit={handleSearch} className="flex items-center space-x-4 mb-4">
+    <div className="flex items-center space-x-4 mb-4">
+      <select
+        value={gender}
+        onChange={handleGenderChange}
+        className="border p-2 rounded"
+      >
+        <option value="">All Genders</option>
+        {genders.map((g) => (
+          <option key={g.name} value={g.name}>
+            {g.name}
+          </option>
+        ))}
+      </select>
+
+      <select
+        value={region}
+        onChange={handleRegionChange}
+        className="border p-2 rounded"
+      >
+        <option value="">All Regions</option>
+        {regions.map((r) => (
+          <option key={r.name} value={r.name}>
+            {r.name}
+          </option>
+        ))}
+      </select>
+
+      <select
+        value={habitat}
+        onChange={handleHabitatChange}
+        className="border p-2 rounded"
+      >
+        <option value="">All Habitats</option>
+        {habitats.map((h) => (
+          <option key={h.name} value={h.name}>
+            {h.name}
+          </option>
+        ))}
+      </select>
+
       <input
         type="text"
         placeholder="Search by name"
@@ -19,17 +87,15 @@ const Filter = ({ onFilter }) => {
         onChange={(e) => setName(e.target.value)}
         className="border p-2 rounded w-full"
       />
-      <button
-        type="submit"
-        className="bg-yellow-500 text-white px-4 py-2 rounded flex items-center hover:bg-white"
-      >
+
+      <div className="bg-yellow-500 text-white px-4 py-2 rounded flex items-center">
         <img
           src={pikaSearch}
           alt="Search Icon"
           className="ml-2 h-10 w-20"
         />
-      </button>
-    </form>
+      </div>
+    </div>
   );
 };
 

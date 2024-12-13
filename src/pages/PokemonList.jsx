@@ -1,22 +1,31 @@
 /* eslint-disable no-unused-vars */
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { getPokemonList } from '../store/pokemonSlice';
+import { getPokemonList, getGenders, getRegions, getHabitats } from '../store/pokemonSlice';
 import PokemonCard from '../components/PokemonCard';
 import Filter from '../components/Filter';
 import Loader from '../components/Loader';
 import NotFound from '../components/NotFound';
+import { fetchGenderDetail, fetchHabitatDetail, fetchRegionDetail, fetchPokedex } from '../api/apiServices';
 
 const PokemonList = () => {
   const dispatch = useDispatch();
-  const { list, count, next, previous, status, error } = useSelector((state) => state.pokemon);
+  const { list, next, previous, status, error, genders, regions, habitats } = useSelector((state) => state.pokemon);
   const [offset, setOffset] = useState(0);
   const limit = 1302;
+
   const [filteredList, setFilteredList] = useState([]);
   const [searchedName, setSearchedName] = useState('');
+  const [selectedGender, setSelectedGender] = useState('');
+  const [selectedRegion, setSelectedRegion] = useState('');
+  const [selectedHabitat, setSelectedHabitat] = useState('');
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     dispatch(getPokemonList({ offset, limit }));
+    dispatch(getGenders());
+    dispatch(getRegions());
+    dispatch(getHabitats());
   }, [dispatch, offset]);
 
   useEffect(() => {
@@ -31,28 +40,71 @@ const PokemonList = () => {
     }
   };
 
-  const handleFilter = ({ name }) => {
+  const handleFilter = async ({ name, gender, region, habitat }) => {
+    setLoading(true);
     setSearchedName(name);
-    if (name) {
-      const filtered = list.filter((pokemon) =>
+    setSelectedGender(gender);
+    setSelectedRegion(region);
+    setSelectedHabitat(habitat);
+
+    let updatedList = list;
+
+    if (name && name.trim() !== '') {
+      updatedList = updatedList.filter((pokemon) =>
         pokemon.name.toLowerCase().includes(name.toLowerCase())
       );
-      setFilteredList(filtered);
-    } else {
-      setFilteredList(list);
-      setSearchedName('');
     }
+
+    if (gender) {
+      const genderId = gender === 'female' ? 1 : gender === 'male' ? 2 : 3;
+      const genderRes = await fetchGenderDetail(genderId);
+      const speciesDetails = genderRes.data.pokemon_species_details;
+      const genderSpeciesNames = speciesDetails.map((d) => d.pokemon_species.name);
+      updatedList = updatedList.filter((pokemon) =>
+        genderSpeciesNames.includes(pokemon.name.toLowerCase())
+      );
+    }
+
+    if (habitat) {
+      const habitatRes = await fetchHabitatDetail(habitat);
+      const habitatSpecies = habitatRes.data.pokemon_species;
+      const habitatSpeciesNames = habitatSpecies.map((s) => s.name);
+      updatedList = updatedList.filter((pokemon) =>
+        habitatSpeciesNames.includes(pokemon.name.toLowerCase())
+      );
+    }
+
+    if (region) {
+      const regionRes = await fetchRegionDetail(region);
+      const pokedexes = regionRes.data.pokedexes;
+      let regionSpeciesNames = [];
+      for (const pd of pokedexes) {
+        const pdRes = await fetchPokedex(pd.url);
+        const pokemonEntries = pdRes.data.pokemon_entries || [];
+        const speciesNames = pokemonEntries.map((e) => e.pokemon_species.name);
+        regionSpeciesNames = [...regionSpeciesNames, ...speciesNames];
+      }
+      regionSpeciesNames = Array.from(new Set(regionSpeciesNames));
+      updatedList = updatedList.filter((pokemon) =>
+        regionSpeciesNames.includes(pokemon.name.toLowerCase())
+      );
+    }
+
+    setFilteredList(updatedList);
+    setLoading(false);
   };
 
   return (
     <div className="w-full min-h-screen relative">
-      {status === 'loading' && <Loader />}
-
+      {(status === 'loading' || loading) && <Loader />}
       <div className="container mx-auto p-4">
-        <Filter onFilter={handleFilter} />
-
+        <Filter
+          onFilter={handleFilter}
+          genders={genders}
+          regions={regions}
+          habitats={habitats}
+        />
         {status === 'failed' && <p className="text-red-500">{error}</p>}
-
         {status === 'succeeded' && filteredList.length === 0 && searchedName ? (
           <NotFound searchedName={searchedName} />
         ) : (
