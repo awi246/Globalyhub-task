@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { getPokemonDetail } from '../store/pokemonSlice';
 import Loader from '../components/Loader';
+import pikaBack from '../assets/pikaSearch.png';
+
 
 const PokemonDetail = () => {
   const { name } = useParams();
@@ -174,7 +176,11 @@ const PokemonDetail = () => {
           onClick={() => navigate(-1)}
           className="mb-6 bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded shadow flex items-center transition-colors"
         >
-          <span className="text-xl">←</span> Back
+          <span className="text-xl">←</span>   <img
+          src={pikaBack}
+          alt="Search Icon"
+          className=" h-10 w-20"
+        />
         </button>
 
         <div className="flex flex-col items-center">
