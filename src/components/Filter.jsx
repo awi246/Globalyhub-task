@@ -184,7 +184,7 @@ const Filter = ({ onFilter, genders = [], regions = [], habitats = [] }) => {
           placement="bottomLeft"
           getPopupContainer={(trigger) => trigger.parentNode}
         >
-          <Button className="border border-gray-300 p-2 rounded flex items-center">
+          <Button className="border border-gray-300 p-2 rounded flex items-center h-10">
             <FaFilter className="mr-2 text-purple-500" /> Filter <DownOutlined className="ml-1" />
           </Button>
         </Dropdown>
