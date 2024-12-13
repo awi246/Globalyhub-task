@@ -5,6 +5,7 @@ import { getPokemonList } from '../store/pokemonSlice';
 import PokemonCard from '../components/PokemonCard';
 import Filter from '../components/Filter';
 import Loader from '../components/Loader';
+import NotFound from '../components/NotFound';
 
 const PokemonList = () => {
   const dispatch = useDispatch();
@@ -12,6 +13,7 @@ const PokemonList = () => {
   const [offset, setOffset] = useState(0);
   const limit = 1302;
   const [filteredList, setFilteredList] = useState([]);
+  const [searchedName, setSearchedName] = useState('');
 
   useEffect(() => {
     dispatch(getPokemonList({ offset, limit }));
@@ -30,11 +32,15 @@ const PokemonList = () => {
   };
 
   const handleFilter = ({ name }) => {
+    setSearchedName(name);
     if (name) {
-      const filtered = list.filter((pokemon) => pokemon.name.includes(name.toLowerCase()));
+      const filtered = list.filter((pokemon) =>
+        pokemon.name.toLowerCase().includes(name.toLowerCase())
+      );
       setFilteredList(filtered);
     } else {
       setFilteredList(list);
+      setSearchedName('');
     }
   };
 
@@ -47,11 +53,15 @@ const PokemonList = () => {
 
         {status === 'failed' && <p className="text-red-500">{error}</p>}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 h-[90vh] overflow-auto w-full">
-          {filteredList.map((pokemon) => (
-            <PokemonCard key={pokemon.name} pokemon={pokemon} />
-          ))}
-        </div>
+        {status === 'succeeded' && filteredList.length === 0 && searchedName ? (
+          <NotFound searchedName={searchedName} />
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 h-[90vh] overflow-auto w-full">
+            {filteredList.map((pokemon) => (
+              <PokemonCard key={pokemon.name} pokemon={pokemon} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
-import  { useState } from 'react';
+import { useState } from 'react';
+import pikaSearch from '../assets/pikaSearch.png';
 
 // eslint-disable-next-line react/prop-types
 const Filter = ({ onFilter }) => {
@@ -18,8 +19,15 @@ const Filter = ({ onFilter }) => {
         onChange={(e) => setName(e.target.value)}
         className="border p-2 rounded w-full"
       />
-      <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
-        Search
+      <button
+        type="submit"
+        className="bg-yellow-500 text-white px-4 py-2 rounded flex items-center hover:bg-white"
+      >
+        <img
+          src={pikaSearch}
+          alt="Search Icon"
+          className="ml-2 h-10 w-20"
+        />
       </button>
     </form>
   );

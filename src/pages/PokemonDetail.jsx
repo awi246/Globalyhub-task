@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { getPokemonDetail } from '../store/pokemonSlice';
@@ -9,6 +9,7 @@ const PokemonDetail = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { selectedPokemon, status, error } = useSelector((state) => state.pokemon);
+  const [activeGeneration, setActiveGeneration] = useState(null);
 
   useEffect(() => {
     dispatch(getPokemonDetail(name));
@@ -72,7 +73,7 @@ const PokemonDetail = () => {
           {spriteCategories.map((key) => (
             <div
               key={key}
-              className="flex flex-col items-center bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow"
+              className="flex flex-col items-center bg-white p-4 rounded-lg shadow hover:shadow-xl transition-shadow transform hover:scale-105"
             >
               <img
                 src={sprites[key]}
@@ -96,53 +97,70 @@ const PokemonDetail = () => {
         <h2 className="text-2xl font-semibold mb-4">Version-Specific Sprites</h2>
         {Object.keys(versions).map((generation) => (
           <div key={generation} className="mb-4">
-            <h3 className="text-xl font-semibold capitalize mb-2">
-              {generation.replace('-', ' ')}
-            </h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-              {Object.keys(versions[generation]).map((versionKey) => {
-                const versionData = versions[generation][versionKey];
-                if (typeof versionData === 'object' && !Array.isArray(versionData)) {
-                  return Object.keys(versionData).map((spriteKey) => (
-                    <div
-                      key={`${versionKey}-${spriteKey}`}
-                      className="flex flex-col items-center bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow"
-                    >
-                      <img
-                        src={versionData[spriteKey]}
-                        alt={`${name} ${generation} ${versionKey} ${spriteKey}`}
-                        className="w-24 h-24 object-contain"
-                        loading="lazy"
-                      />
-                      <p className="mt-2 text-sm capitalize">
-                        {versionKey.replace(/_/g, ' ')} {spriteKey.replace(/_/g, ' ')}
-                      </p>
-                    </div>
-                  ));
-                }
+            <button
+              onClick={() => setActiveGeneration(activeGeneration === generation ? null : generation)}
+              className="w-full text-left flex justify-between items-center bg-gray-200 p-3 rounded-lg shadow hover:bg-gray-300 transition-colors"
+            >
+              <h3 className="text-xl font-semibold capitalize">
+                {generation.replace('-', ' ')}
+              </h3>
+              <svg
+                className={`w-6 h-6 transform transition-transform ${activeGeneration === generation ? 'rotate-180' : ''
+                  }`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            {activeGeneration === generation && (
+              <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                {Object.keys(versions[generation]).map((versionKey) => {
+                  const versionData = versions[generation][versionKey];
+                  if (typeof versionData === 'object' && !Array.isArray(versionData)) {
+                    return Object.keys(versionData).map((spriteKey) => (
+                      <div
+                        key={`${versionKey}-${spriteKey}`}
+                        className="flex flex-col items-center bg-white p-4 rounded-lg shadow hover:shadow-xl transition-shadow transform hover:scale-105"
+                      >
+                        <img
+                          src={versionData[spriteKey]}
+                          alt={`${name} ${generation} ${versionKey} ${spriteKey}`}
+                          className="w-24 h-24 object-contain"
+                          loading="lazy"
+                        />
+                        <p className="mt-2 text-sm capitalize">
+                          {versionKey.replace(/_/g, ' ')} {spriteKey.replace(/_/g, ' ')}
+                        </p>
+                      </div>
+                    ));
+                  }
 
-                if (typeof versionData === 'string') {
-                  return (
-                    <div
-                      key={versionKey}
-                      className="flex flex-col items-center bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow"
-                    >
-                      <img
-                        src={versionData}
-                        alt={`${name} ${generation} ${versionKey}`}
-                        className="w-24 h-24 object-contain"
-                        loading="lazy"
-                      />
-                      <p className="mt-2 text-sm capitalize">
-                        {versionKey.replace(/_/g, ' ')}
-                      </p>
-                    </div>
-                  );
-                }
+                  if (typeof versionData === 'string') {
+                    return (
+                      <div
+                        key={versionKey}
+                        className="flex flex-col items-center bg-white p-4 rounded-lg shadow hover:shadow-xl transition-shadow transform hover:scale-105"
+                      >
+                        <img
+                          src={versionData}
+                          alt={`${name} ${generation} ${versionKey}`}
+                          className="w-24 h-24 object-contain"
+                          loading="lazy"
+                        />
+                        <p className="mt-2 text-sm capitalize">
+                          {versionKey.replace(/_/g, ' ')}
+                        </p>
+                      </div>
+                    );
+                  }
 
-                return null;
-              })}
-            </div>
+                  return null;
+                })}
+              </div>
+            )}
           </div>
         ))}
       </div>
@@ -160,12 +178,15 @@ const PokemonDetail = () => {
         </button>
 
         <div className="flex flex-col items-center">
-          <div className="bg-gradient-to-b from-white to-gray-100 p-6 rounded-full shadow-lg">
-            <img
-              src={sprites.front_default || '/placeholder.png'}
-              alt={name}
-              className="w-40 h-40 object-contain"
-            />
+          <div className="relative">
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 animate-pulse opacity-75"></div>
+            <div className="relative bg-white p-4 rounded-full shadow-2xl">
+              <img
+                src={sprites.front_default || '/placeholder.png'}
+                alt={name}
+                className="w-40 h-40 object-contain rounded-full border-4 border-white"
+              />
+            </div>
           </div>
 
           <h1 className="text-5xl capitalize font-bold mt-6">{name}</h1>
@@ -187,7 +208,7 @@ const PokemonDetail = () => {
           {renderSprites()}
 
           <div className="w-full mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="bg-blue-50 p-6 rounded-lg shadow hover:shadow-md transition-shadow">
+            <div className="bg-blue-50 p-6 rounded-lg shadow hover:shadow-xl transition-shadow">
               <h2 className="text-2xl font-semibold mb-4">Basic Information</h2>
               <ul className="space-y-2 text-gray-700">
                 <li>
@@ -208,7 +229,7 @@ const PokemonDetail = () => {
               </ul>
             </div>
 
-            <div className="bg-green-50 p-6 rounded-lg shadow hover:shadow-md transition-shadow">
+            <div className="bg-green-50 p-6 rounded-lg shadow hover:shadow-xl transition-shadow">
               <h2 className="text-2xl font-semibold mb-4">Abilities</h2>
               <ul className="list-disc list-inside text-gray-700 space-y-2">
                 {abilities.length > 0 ? (
@@ -235,7 +256,7 @@ const PokemonDetail = () => {
               )}
             </div>
 
-            <div className="bg-purple-50 p-6 rounded-lg shadow hover:shadow-md transition-shadow">
+            <div className="bg-purple-50 p-6 rounded-lg shadow hover:shadow-xl transition-shadow">
               <h2 className="text-2xl font-semibold mb-4">Types</h2>
               <ul className="list-disc list-inside text-gray-700 space-y-2">
                 {types.map((typeInfo) => (
@@ -260,7 +281,7 @@ const PokemonDetail = () => {
           </div>
 
           <div className="w-full mt-8 grid grid-cols-1 lg:grid-cols-1 gap-6">
-            <div className="bg-teal-50 p-6 rounded-lg shadow hover:shadow-md transition-shadow">
+            <div className="bg-teal-50 p-6 rounded-lg shadow hover:shadow-xl transition-shadow">
               <h2 className="text-2xl font-semibold mb-4">Stats</h2>
               {stats.length > 0 ? (
                 <ul className="list-disc list-inside text-gray-700 space-y-2">
